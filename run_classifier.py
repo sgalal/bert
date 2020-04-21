@@ -373,6 +373,49 @@ class ColaProcessor(DataProcessor):
           InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
     return examples
 
+class BLProcessor(DataProcessor):
+  """Processor for https://github.com/sgalal/bl."""
+  def __init__(self):
+    super().__init__()
+
+    import sqlite3
+    here = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(os.path.join(here, "../data.sqlite3"))
+    cur = conn.cursor()
+    res = []
+    for guid, bug_description, token_group, label in cur.execute('SELECT * FROM data;'):
+      res.append((guid, bug_description, token_group, label))
+    conn.close()
+    data_len = len(res)
+
+    self.train = res[:data_len * 7 // 10]
+    self.dev = res[data_len * 7 // 10:data_len * 9 // 10]
+    self.test = res[data_len * 9 // 10:]
+
+  def get_train_examples(self, data_dir):
+    """See base class."""
+    res = []
+    for guid, bug_description, token_group, label in self.train:
+      res.append(InputExample(guid="train" + guid, text_a=bug_description, text_b=token_group, label=label))
+    return res
+
+  def get_dev_examples(self, data_dir):
+    """See base class."""
+    res = []
+    for guid, bug_description, token_group, label in self.dev:
+      res.append(InputExample(guid="dev" + guid, text_a=bug_description, text_b=token_group, label=label))
+    return res
+
+  def get_test_examples(self, data_dir):
+    """See base class."""
+    res = []
+    for guid, bug_description, token_group, label in self.test:
+      res.append(InputExample(guid="test" + guid, text_a=bug_description, text_b=None, label="0"))
+    return res
+
+  def get_labels(self):
+    """See base class."""
+    return ["0", "1"]
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
                            tokenizer):
@@ -788,6 +831,7 @@ def main(_):
       "mnli": MnliProcessor,
       "mrpc": MrpcProcessor,
       "xnli": XnliProcessor,
+      "blpr": BLProcessor,
   }
 
   tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
