@@ -396,21 +396,21 @@ class BLProcessor(DataProcessor):
     """See base class."""
     res = []
     for guid, bug_description, token_group, label in self.train:
-      res.append(InputExample(guid="train" + guid, text_a=bug_description, text_b=token_group, label=label))
+      res.append(InputExample(guid="train" + str(guid), text_a=bug_description, text_b=token_group, label=label))
     return res
 
   def get_dev_examples(self, data_dir):
     """See base class."""
     res = []
     for guid, bug_description, token_group, label in self.dev:
-      res.append(InputExample(guid="dev" + guid, text_a=bug_description, text_b=token_group, label=label))
+      res.append(InputExample(guid="dev" + str(guid), text_a=bug_description, text_b=token_group, label=label))
     return res
 
   def get_test_examples(self, data_dir):
     """See base class."""
     res = []
     for guid, bug_description, token_group, label in self.test:
-      res.append(InputExample(guid="test" + guid, text_a=bug_description, text_b=None, label="0"))
+      res.append(InputExample(guid="test" + str(guid), text_a=bug_description, text_b=None, label="0"))
     return res
 
   def get_labels(self):
