@@ -383,14 +383,17 @@ class BLProcessor(DataProcessor):
     conn = sqlite3.connect(os.path.join(here, "../data.sqlite3"))
     cur = conn.cursor()
     res = []
-    for guid, bug_description, token_group, label in cur.execute('SELECT * FROM data;'):
+    for guid, bug_description, token_group, label in cur.execute('''SELECT bugs.id || '-' || file_segments.id AS id,
+bug_description, token_group, label FROM bugs
+INNER JOIN file_segments
+ON bugs.id = file_segments.bug_id;'''):
       res.append((guid, bug_description, token_group, label))
     conn.close()
     data_len = len(res)
 
     self.train = res[:data_len * 7 // 10]
-    self.dev = res[data_len * 7 // 10:data_len * 9 // 10]
-    self.test = res[data_len * 9 // 10:]
+    self.dev = res[data_len * 7 // 10:]
+    self.test = []
 
   def get_train_examples(self, data_dir):
     """See base class."""
